@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clínica Veterinaria Patitas</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <h1>🐾 Clínica Veterinaria Patitas</h1>
+    <p>Control básico de pacientes y visitas</p>
+  </header>
+
+  <main class="layout">
+    <section class="column">
+      <div class="card">
+        <h2>Registrar paciente</h2>
+        <form id="form-paciente" novalidate>
+          <label>Nombre de la mascota
+            <input type="text" id="p-nombre" maxlength="40">
+          </label>
+          <div class="row">
+            <label>Especie
+              <select id="p-especie">
+                <option value="">Seleccione...</option>
+                <option>Perro</option>
+                <option>Gato</option>
+                <option>Ave</option>
+                <option>Conejo</option>
+                <option>Otro</option>
+              </select>
+            </label>
+            <label>Raza
+              <input type="text" id="p-raza" maxlength="40">
+            </label>
+          </div>
+          <div class="row">
+            <label>Fecha de nacimiento
+              <input type="date" id="p-nacimiento">
+            </label>
+            <label>Sexo
+              <select id="p-sexo">
+                <option value="">Seleccione...</option>
+                <option>Macho</option>
+                <option>Hembra</option>
+              </select>
+            </label>
+          </div>
+          <label>Nombre del responsable
+            <input type="text" id="p-responsable" maxlength="60">
+          </label>
+          <label>Teléfono de contacto
+            <input type="tel" id="p-telefono" maxlength="20">
+          </label>
+          <p class="msg" id="msg-paciente" role="alert"></p>
+          <button type="submit">Registrar paciente</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Registrar visita</h2>
+        <form id="form-visita" novalidate>
+          <label>Paciente
+            <select id="v-paciente"></select>
+          </label>
+          <label>Fecha de la visita
+            <input type="date" id="v-fecha">
+          </label>
+          <label>Motivo
+            <input type="text" id="v-motivo" maxlength="80">
+          </label>
+          <label>Observaciones
+            <textarea id="v-observaciones" rows="3" maxlength="500"></textarea>
+          </label>
+          <p class="msg" id="msg-visita" role="alert"></p>
+          <button type="submit">Registrar visita</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="column">
+      <div class="card">
+        <h2>Pacientes registrados</h2>
+        <input type="search" id="buscar" placeholder="Buscar por mascota o responsable...">
+        <ul id="lista-pacientes" class="patient-list"></ul>
+      </div>
+
+      <div class="card" id="detalle">
+        <h2>Ficha e historial</h2>
+        <div id="detalle-contenido">
+          <p class="empty">Seleccione un paciente de la lista para ver su información y visitas.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/storage.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
