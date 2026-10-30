@@ -1,5 +1,5 @@
-# RETO N
-- Datos: minutos que tomó y cantidad aproximada de prompts.
-- Qué hicimos y qué decidió la IA por nosotros:
-- Qué nos sorprendió o salió mal:
-- Qué haríamos distinto:
+## RETO 1
+- **Datos:** 16 minutos de trabajo y 2 prompts.
+- **Qué hicimos y qué decidió la IA por nosotros:** Definimos el contexto de una clínica veterinaria, el uso de HTML, CSS y JavaScript y tres funcionalidades mínimas: registrar pacientes, registrar visitas y consultar pacientes con su historial. La IA decidió la estructura del proyecto, los nombres y organización de los archivos, el estilo visual de la aplicación y las condiciones y validaciones de los inputs.
+- **Qué nos sorprendió o salió mal:** Nos sorprendió que con solo dos prompts la IA construyera prácticamente toda la aplicación. En general no tuvimos problemas relevantes: las funcionalidades solicitadas funcionaron, el diseño generado fue bueno y además la interfaz resultó responsive.
+- **Qué haríamos distinto:** Para este alcance no cambiaríamos el proceso utilizado, ya que el resultado cumplió satisfactoriamente los criterios del reto. En un proyecto real definiríamos con mayor precisión las decisiones que no quisiéramos delegar a la IA.
