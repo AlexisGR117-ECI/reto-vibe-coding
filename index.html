@@ -47,12 +47,11 @@
               </select>
             </label>
           </div>
-          <label>Nombre del responsable
-            <input type="text" id="p-responsable" maxlength="60">
-          </label>
-          <label>Teléfono de contacto
-            <input type="tel" id="p-telefono" maxlength="20">
-          </label>
+          <fieldset class="responsables">
+            <legend>Responsables</legend>
+            <div id="responsables-campos"></div>
+            <datalist id="responsables-sugeridos"></datalist>
+          </fieldset>
           <p class="msg" id="msg-paciente" role="alert"></p>
           <button type="submit">Registrar paciente</button>
         </form>
@@ -91,6 +90,12 @@
         <div id="detalle-contenido">
           <p class="empty">Seleccione un paciente de la lista para ver su información y visitas.</p>
         </div>
+      </div>
+
+      <div class="card">
+        <h2>Responsables</h2>
+        <ul id="lista-responsables" class="patient-list"></ul>
+        <div id="detalle-responsable"></div>
       </div>
     </section>
   </main>

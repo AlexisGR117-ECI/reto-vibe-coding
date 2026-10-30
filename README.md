@@ -4,9 +4,14 @@ Aplicación web sencilla (HTML + CSS + JavaScript, sin frameworks ni dependencia
 
 ## Funcionalidades
 
-1. **Registrar paciente**: nombre, especie, raza, fecha de nacimiento, sexo, responsable y teléfono. Todos los campos son obligatorios; la fecha no puede ser futura y el teléfono debe ser válido.
+1. **Registrar paciente**: nombre, especie, raza, fecha de nacimiento, sexo y **uno o varios responsables** (cada uno con nombre y teléfono). Todos los campos son obligatorios; la fecha no puede ser futura y los teléfonos deben ser válidos.
 2. **Registrar visita**: se elige un paciente existente y se guarda fecha, motivo y observaciones.
-3. **Consultar pacientes e historial**: lista con buscador; al seleccionar un paciente se muestra su ficha y sus visitas (más recientes primero).
+3. **Consultar pacientes e historial**: lista con buscador (por mascota o responsable); al seleccionar un paciente se muestra su ficha, **todos sus responsables** y sus visitas (más recientes primero).
+4. **Consultar responsables**: la tarjeta "Responsables" lista a cada responsable; al seleccionarlo se muestran **todas sus mascotas**.
+
+### Múltiples responsables
+
+Una mascota puede tener varios responsables (por ejemplo, una familia). En el formulario hay una fila inicial (nombre + teléfono) con un botón **+** a la derecha: al pulsarlo aparece otra fila debajo; las filas extra tienen un botón **×** para quitarlas. Un mismo responsable no puede repetirse en la misma mascota (se compara el nombre sin distinguir mayúsculas). Un responsable se identifica por su nombre, así que escribir el mismo nombre en otra mascota lo asocia a ambas; el campo sugiere los nombres ya existentes y completa su teléfono. Los datos guardados con el formato anterior (un solo responsable) se migran automáticamente.
 
 ## Ejecutar (menos de 5 minutos)
 
@@ -30,12 +35,18 @@ Para reiniciar los datos de ejemplo, borre los datos del sitio (localStorage) en
 
 **Registrar paciente**
 1. En "Registrar paciente" pulse el botón sin llenar nada: aparece un error y los campos inválidos se marcan en rojo.
-2. Complete todos los campos (p. ej. Nube, Conejo, Enano, fecha pasada, Hembra, "Responsable Prueba", 555-0199) y registre. Aparece en "Pacientes registrados" y queda seleccionado.
+2. Complete todos los campos (p. ej. Nube, Conejo, Enano, fecha pasada, Hembra, responsable "Responsable Prueba" con 555-0199) y registre. Aparece en "Pacientes registrados" y queda seleccionado.
 3. Recargue la página: el paciente sigue ahí.
 
 **Registrar visita**
 1. En "Registrar visita" elija "Coco" (sin visitas), deje campos vacíos y envíe: se muestra el error.
 2. Complete fecha, motivo y observaciones y envíe: aparece el mensaje de confirmación.
+
+**Múltiples responsables**
+1. *Un responsable:* registre "Toby" con un solo responsable ("Familia Prueba Uno", 555-0201). Queda en la lista.
+2. *Dos responsables:* registre "Fido" y pulse **+** para añadir una segunda fila; use "Familia Prueba Uno" y "Familia Prueba Dos". Si repite el mismo nombre en dos filas aparece un error.
+3. *Mascota → responsables:* haga clic en "Fido": la ficha muestra ambos responsables (el nombre es un enlace a su detalle).
+4. *Responsable → mascotas:* en la tarjeta "Responsables" haga clic en "Familia Prueba Uno": se muestran Toby y Fido (con clic en una mascota se abre su ficha).
 
 **Consultar pacientes e historial**
 1. Haga clic en "Luna": se ven su ficha y 2 visitas.

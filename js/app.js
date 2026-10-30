@@ -8,6 +8,80 @@
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   };
   const uid = (p) => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const clave = (nombre) => nombre.trim().toLowerCase();
+  let respSeleccionado = null;
+
+  // Los responsables se identifican por nombre (sin distinguir mayúsculas); se derivan de las mascotas.
+  function responsablesAgrupados() {
+    const mapa = new Map();
+    pacientes.forEach((p) => p.responsables.forEach((r) => {
+      const k = clave(r.nombre);
+      if (!mapa.has(k)) mapa.set(k, { clave: k, nombre: r.nombre, telefono: r.telefono, mascotas: [] });
+      mapa.get(k).mascotas.push(p);
+    }));
+    return [...mapa.values()].sort((a, b) => a.nombre.localeCompare(b.nombre));
+  }
+
+  function filaResponsable(primera) {
+    const fila = document.createElement("div");
+    fila.className = "resp-row";
+    fila.innerHTML = `
+      <input type="text" class="r-nombre" list="responsables-sugeridos" maxlength="60" placeholder="Nombre del responsable" aria-label="Nombre del responsable">
+      <input type="text" class="r-telefono" maxlength="20" placeholder="Teléfono" aria-label="Teléfono del responsable">
+      <button type="button" class="${primera ? "agregar" : "quitar"}" title="${primera ? "Agregar otro responsable" : "Quitar responsable"}"
+        aria-label="${primera ? "Agregar otro responsable" : "Quitar responsable"}">${primera ? "+" : "×"}</button>`;
+    return fila;
+  }
+
+  function reiniciarResponsables() {
+    const cont = $("responsables-campos");
+    cont.innerHTML = "";
+    cont.appendChild(filaResponsable(true));
+  }
+
+  $("responsables-campos").addEventListener("click", (e) => {
+    const btn = e.target.closest("button");
+    if (!btn) return;
+    if (btn.classList.contains("agregar")) {
+      const fila = filaResponsable(false);
+      $("responsables-campos").appendChild(fila);
+      fila.querySelector(".r-nombre").focus();
+    } else {
+      btn.closest(".resp-row").remove();
+    }
+  });
+
+  // Al elegir un responsable existente se completa su teléfono.
+  $("responsables-campos").addEventListener("input", (e) => {
+    if (!e.target.classList.contains("r-nombre")) return;
+    const existente = responsablesAgrupados().find((r) => r.clave === clave(e.target.value));
+    const tel = e.target.closest(".resp-row").querySelector(".r-telefono");
+    if (existente && !tel.value) tel.value = existente.telefono;
+  });
+
+  function renderSugeridos() {
+    $("responsables-sugeridos").innerHTML = responsablesAgrupados()
+      .map((r) => `<option value="${escapar(r.nombre)}"></option>`).join("");
+  }
+
+  function renderResponsables() {
+    const ul = $("lista-responsables");
+    const grupos = responsablesAgrupados();
+    ul.innerHTML = grupos.map((r) => `
+      <li tabindex="0" data-resp="${escapar(r.clave)}" class="${r.clave === respSeleccionado ? "selected" : ""}">
+        <strong>${escapar(r.nombre)}</strong>
+        <small>${r.mascotas.length} mascota(s)</small>
+      </li>`).join("") || '<li class="empty">No hay responsables registrados.</li>';
+
+    const det = $("detalle-responsable");
+    const r = grupos.find((x) => x.clave === respSeleccionado);
+    det.innerHTML = r ? `
+      <h3>${escapar(r.nombre)}</h3>
+      <p>Teléfono: ${escapar(r.telefono)}</p>
+      <p><strong>Mascotas (${r.mascotas.length}):</strong></p>
+      ${r.mascotas.map((m) => `<button type="button" class="link pet-chip" data-pet="${m.id}">${escapar(m.nombre)} (${escapar(m.especie)})</button>`).join("")}`
+      : '<p class="empty">Seleccione un responsable para ver sus mascotas.</p>';
+  }
 
   function escapar(t) {
     const d = document.createElement("div");
@@ -40,6 +114,8 @@
     form.querySelectorAll(".invalid").forEach((el) => el.classList.remove("invalid"));
   }
 
+  
+
   function renderSelectVisita() {
     const sel = $("v-paciente");
     const actual = sel.value;
@@ -52,7 +128,7 @@
   function renderLista() {
     const q = $("buscar").value.trim().toLowerCase();
     const lista = pacientes.filter((p) =>
-      p.nombre.toLowerCase().includes(q) || p.responsable.toLowerCase().includes(q));
+      p.nombre.toLowerCase().includes(q) || p.responsables.some((r) => r.nombre.toLowerCase().includes(q)));
     const ul = $("lista-pacientes");
     if (!lista.length) {
       ul.innerHTML = '<li class="empty">No hay pacientes que coincidan.</li>';
@@ -61,7 +137,7 @@
     ul.innerHTML = lista.map((p) => `
       <li tabindex="0" data-id="${p.id}" class="${p.id === seleccionado ? "selected" : ""}">
         <strong>${escapar(p.nombre)}</strong> · ${escapar(p.especie)}
-        <small>Responsable: ${escapar(p.responsable)} · ${p.visitas.length} visita(s)</small>
+        <small>Responsables: ${p.responsables.map((r) => escapar(r.nombre)).join(", ")} · ${p.visitas.length} visita(s)</small>
       </li>`).join("");
   }
 
@@ -80,8 +156,7 @@
         <dt>Raza</dt><dd>${escapar(p.raza)}</dd>
         <dt>Sexo</dt><dd>${escapar(p.sexo)}</dd>
         <dt>Nacimiento</dt><dd>${formatoFecha(p.nacimiento)}</dd>
-        <dt>Responsable</dt><dd>${escapar(p.responsable)}</dd>
-        <dt>Teléfono</dt><dd>${escapar(p.telefono)}</dd>
+        <dt>Responsables</dt><dd>${p.responsables.map((r) => `<button type="button" class="link" data-resp="${escapar(clave(r.nombre))}">${escapar(r.nombre)}</button> (${escapar(r.telefono)})`).join("<br>")}</dd>
       </dl>
       <h3>Historial de visitas (${visitas.length})</h3>
       ${visitas.length ? visitas.map((v) => `
@@ -95,6 +170,8 @@
     renderSelectVisita();
     renderLista();
     renderDetalle();
+    renderSugeridos();
+    renderResponsables();
   }
 
   function seleccionar(id) {
@@ -104,6 +181,28 @@
     renderLista();
     renderDetalle();
   }
+
+  function seleccionarResponsable(k) {
+    respSeleccionado = k;
+    renderResponsables();
+  }
+
+  $("lista-responsables").addEventListener("click", (e) => {
+    const li = e.target.closest("li[data-resp]");
+    if (li) seleccionarResponsable(li.dataset.resp);
+  });
+  $("lista-responsables").addEventListener("keydown", (e) => {
+    const li = e.target.closest("li[data-resp]");
+    if (li && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); seleccionarResponsable(li.dataset.resp); }
+  });
+  $("detalle-contenido").addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-resp]");
+    if (b) seleccionarResponsable(b.dataset.resp);
+  });
+  $("detalle-responsable").addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-pet]");
+    if (b) seleccionar(b.dataset.pet);
+  });
 
   $("lista-pacientes").addEventListener("click", (e) => {
     const li = e.target.closest("li[data-id]");
@@ -119,30 +218,49 @@
     e.preventDefault();
     const f = {
       nombre: $("p-nombre"), especie: $("p-especie"), raza: $("p-raza"), nacimiento: $("p-nacimiento"),
-      sexo: $("p-sexo"), responsable: $("p-responsable"), telefono: $("p-telefono")
+      sexo: $("p-sexo")
     };
     const v = (k) => f[k].value.trim();
+    const filas = [...document.querySelectorAll("#responsables-campos .resp-row")].map((fila) => ({
+      fila, nombre: fila.querySelector(".r-nombre"), telefono: fila.querySelector(".r-telefono")
+    }));
+    // Un responsable no puede repetirse en la misma mascota.
+    const vistos = new Set();
+    let duplicado = false;
+    const chequeos = filas.flatMap((r) => {
+      const k = clave(r.nombre.value);
+      const repetido = k.length >= 3 && vistos.has(k);
+      vistos.add(k);
+      duplicado = duplicado || repetido;
+      return [
+        [r.nombre, r.nombre.value.trim().length >= 3 && !repetido],
+        [r.telefono, /^[0-9+\-\s()]{7,20}$/.test(r.telefono.value.trim())]
+      ];
+    });
     const ok = validar([
       [f.nombre, v("nombre").length >= 2],
       [f.especie, v("especie") !== ""],
       [f.raza, v("raza") !== ""],
       [f.nacimiento, v("nacimiento") !== "" && v("nacimiento") <= hoy()],
       [f.sexo, v("sexo") !== ""],
-      [f.responsable, v("responsable").length >= 3],
-      [f.telefono, /^[0-9+\-\s()]{7,20}$/.test(v("telefono"))]
+      ...chequeos
     ]);
     const msg = $("msg-paciente");
     if (!ok) {
-      mensaje(msg, "Complete todos los campos correctamente (fecha no futura, teléfono con 7+ dígitos).", "error");
+      mensaje(msg, duplicado
+        ? "Un mismo responsable no puede agregarse dos veces a la mascota."
+        : "Complete todos los campos correctamente (fecha no futura, responsables con nombre y teléfono de 7+ dígitos).", "error");
       return;
     }
     const nuevo = { id: uid("p"), visitas: [] };
     Object.keys(f).forEach((k) => (nuevo[k] = v(k)));
+    nuevo.responsables = filas.map((r) => ({ nombre: r.nombre.value.trim(), telefono: r.telefono.value.trim() }));
     pacientes.push(nuevo);
     Storage.save(pacientes);
     seleccionado = nuevo.id;
     e.target.reset();
     limpiarInvalidos(e.target);
+    reiniciarResponsables();
     renderTodo();
     mensaje(msg, `Paciente "${nuevo.nombre}" registrado.`, "ok");
   });
@@ -185,5 +303,6 @@
 
   $("v-fecha").value = hoy();
   $("p-nacimiento").max = hoy();
+  reiniciarResponsables();
   renderTodo();
 })();
